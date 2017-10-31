@@ -54,8 +54,8 @@ class TLDetector(object):
     def pose_cb(self, msg):
         self.pose = msg
 
-    def waypoints_cb(self, waypoints):
-        self.waypoints = waypoints
+    def waypoints_cb(self, msg):
+        self.waypoints = msg.waypoints
 
     def traffic_cb(self, msg):
         self.lights = msg.lights
@@ -101,6 +101,7 @@ class TLDetector(object):
 
         """
         #TODO implement optimized version (OPTIONAL)
+        #TODO: we already know this in waypoint_updater, so why not publish waypoint index and subscribe here
         if self.waypoints is None:
             return
 
@@ -115,6 +116,30 @@ class TLDetector(object):
                 waypoint_index = i
 
         return waypoint_index
+
+    def get_closest_traffic_light(self, stop_line_positions, current_car_wp):
+        """Determines wp index of the closest traffic light. Probably we can assume that waypoints and traffic lights
+        are not changing over time so we could make connections between waypoints and traffic lights once and then reuse it
+        """
+        #TODO: if we have performance problem we probably would need to rewrite this using assumption of constant waypoints and tf
+
+        closest_tf_wp = None
+        closest_tf = None
+
+        for stop_line_position in stop_line_positions:
+            tf_pose = Pose()
+            tf_pose.position.x = stop_line_position[0]
+            tf_pose.position.y = stop_line_position[1]
+            # Find waypoint index corresponding to traffic light
+            tf_wp = self.get_closest_waypoint(tf_pose)
+
+            # Check traffic lights only ahead of the car
+            if tf_wp >= current_car_wp:
+                if closest_tf_wp is None or tf_wp < closest_tf_wp:
+                    closest_tf_wp = tf_wp
+                    closest_tf = stop_line_position
+
+        return closest_tf_wp, closest_tf
 
     def get_light_state(self, light):
         """Determines the current color of the traffic light
@@ -149,14 +174,26 @@ class TLDetector(object):
         # List of positions that correspond to the line to stop in front of for a given intersection
         stop_line_positions = self.config['stop_line_positions']
         if(self.pose):
-            car_position = self.get_closest_waypoint(self.pose.pose)
+            car_position_wp = self.get_closest_waypoint(self.pose.pose)
+
+            light_wp, light = self.get_closest_traffic_light(stop_line_positions, car_position_wp)
+
 
         #TODO find the closest visible traffic light (if one exists)
 
         if light:
             state = self.get_light_state(light)
+
+            #THIS IS ONLY FOR TEST PURPOSE
+            if abs(light_wp - car_position_wp) > 5:
+                state = TrafficLight.RED
+            else:
+                state = TrafficLight.GREEN
+
             return light_wp, state
+
         self.waypoints = None
+
         return -1, TrafficLight.UNKNOWN
 
 if __name__ == '__main__':
