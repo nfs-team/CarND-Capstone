@@ -100,8 +100,21 @@ class TLDetector(object):
             int: index of the closest waypoint in self.waypoints
 
         """
-        #TODO implement
-        return 0
+        #TODO implement optimized version (OPTIONAL)
+        if self.waypoints is None:
+            return
+
+        min_distance = None
+        waypoint_index = None
+
+        for i in range(len(self.waypoints)):
+            distance = pow(self.waypoints[i].pose.pose.position.x - pose.position.x, 2) + pow(
+                self.waypoints[i].pose.pose.position.y - pose.position.y, 2)
+            if min_distance is None or distance < min_distance:
+                min_distance = distance
+                waypoint_index = i
+
+        return waypoint_index
 
     def get_light_state(self, light):
         """Determines the current color of the traffic light
