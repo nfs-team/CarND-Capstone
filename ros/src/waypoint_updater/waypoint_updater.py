@@ -3,9 +3,11 @@
 import rospy
 import tf
 from geometry_msgs.msg import PoseStamped
+from geometry_msgs.msg import TwistStamped
 from styx_msgs.msg import Lane, Waypoint
 from std_msgs.msg import Header
 from std_msgs.msg import Int32
+from velocity_updater import *
 
 import math
 
@@ -39,11 +41,14 @@ class WaypointUpdater(object):
         # Waypoint publisher
         self.final_waypoints_pub = rospy.Publisher('final_waypoints', Lane, queue_size=1)
 
+        rospy.Subscriber('/current_velocity', TwistStamped, self.vel_cb)
 
         # TODO: Add other member variables you need below
         self.waypoints = None
         self.current_position = None
-
+        self.current_velocity = None
+        self.velocity_updater = VelocityUpdater()
+        self.traffic_light = None
         rospy.spin()
 
     def pose_cb(self, msg):
@@ -51,7 +56,10 @@ class WaypointUpdater(object):
         rospy.loginfo('current_pose callback received, position: %f', msg.pose.position.x)
         self.current_position = msg.pose.position
         self.publish_waypoints()
-        pass
+
+    def vel_cb(self, msg):
+        rospy.loginfo('current_velocity callback received, velocity: %f', msg.twist.linear.x)
+        self.current_velocity = msg.twist.linear.x
 
     def waypoints_cb(self, msg):
         # TODO: Implement
@@ -63,7 +71,10 @@ class WaypointUpdater(object):
     def traffic_cb(self, msg):
         # TODO: Callback for /traffic_waypoint message. Implement
         rospy.loginfo('traffic_waypoint callback received. %d', msg.data)
-        pass
+        if msg.data < 0:
+            self.traffic_light = None
+        else:
+            self.traffic_light = msg.data
 
     def obstacle_cb(self, msg):
         # TODO: Callback for /obstacle_waypoint message. We will implement it later
@@ -77,14 +88,17 @@ class WaypointUpdater(object):
             return
 
         next_waypoint_index = self.next_waypoint(self.current_position)
-        rospy.loginfo('next_waypoint_index = %d', next_waypoint_index)
+        # rospy.loginfo('next_waypoint_index = %d', next_waypoint_index)
 
         next_waypoints = self.waypoints[next_waypoint_index:min(next_waypoint_index+LOOKAHEAD_WPS, len(self.waypoints))]
-        rospy.loginfo('num next_waypoints %d', len(next_waypoints))
+        # rospy.loginfo('num next_waypoints %d', len(next_waypoints))
 
+
+        rospy.loginfo('Distance = %d', self.distance(next_waypoints, 0, len(next_waypoints)-1))
 
         # self.max_speed = rospy.get_param('~/waypoint_loader/velocity')
 
+        self.velocity_updater.update(next_waypoints, self.current_velocity, None)
 
         # create and publish ros message
         h = Header()
