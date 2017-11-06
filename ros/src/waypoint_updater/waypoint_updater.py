@@ -7,7 +7,7 @@ from geometry_msgs.msg import TwistStamped
 from styx_msgs.msg import Lane, Waypoint
 from std_msgs.msg import Header
 from std_msgs.msg import Int32
-from velocity_updater import *
+#from velocity_updater import *
 
 import math
 
@@ -47,7 +47,7 @@ class WaypointUpdater(object):
         self.waypoints = None
         self.current_position = None
         self.current_velocity = None
-        self.velocity_updater = VelocityUpdater()
+        #self.velocity_updater = VelocityUpdater(25)
         self.traffic_light = None
         rospy.spin()
 
@@ -98,7 +98,7 @@ class WaypointUpdater(object):
 
         # self.max_speed = rospy.get_param('~/waypoint_loader/velocity')
 
-        self.velocity_updater.update(next_waypoints, self.current_velocity, None)
+        #self.velocity_updater.update(next_waypoints, self.current_velocity, self.traffic_light - next_waypoint_index)
 
         # create and publish ros message
         h = Header()
