@@ -7,7 +7,7 @@ from geometry_msgs.msg import TwistStamped
 from styx_msgs.msg import Lane, Waypoint
 from std_msgs.msg import Header
 from std_msgs.msg import Int32
-#from velocity_updater import *
+from velocity_updater import *
 
 import math
 
@@ -47,7 +47,7 @@ class WaypointUpdater(object):
         self.waypoints = None
         self.current_position = None
         self.current_velocity = None
-        #self.velocity_updater = VelocityUpdater(25)
+        self.velocity_updater = VelocityUpdater(25, rospy)
         self.traffic_light = None
         rospy.spin()
 
@@ -84,7 +84,7 @@ class WaypointUpdater(object):
         # TODO: Implement waypoints publishing
         # NOTE: not sure yet, but I think we need to publish waypoints only on  current_pose event, otherwise we don't know
         # position
-        if self.current_position is None:
+        if self.current_position is None or self.waypoints is None:
             return
 
         next_waypoint_index = self.next_waypoint(self.current_position)
@@ -96,9 +96,22 @@ class WaypointUpdater(object):
 
         rospy.loginfo('Distance = %d', self.distance(next_waypoints, 0, len(next_waypoints)-1))
 
-        # self.max_speed = rospy.get_param('~/waypoint_loader/velocity')
+        self.max_speed = rospy.get_param('~/waypoint_loader/velocity')
 
-        #self.velocity_updater.update(next_waypoints, self.current_velocity, self.traffic_light - next_waypoint_index)
+        if self.traffic_light is None:
+            self.velocity_updater.update(next_waypoints, self.current_velocity, None)
+        else:
+            self.velocity_updater.update(next_waypoints, self.current_velocity,
+                                         self.traffic_light - next_waypoint_index)
+
+
+        i = 0
+        speeds = ''
+        while i < len(next_waypoints):
+            speeds = speeds + "{0:.2f} ".format(self.get_waypoint_velocity(next_waypoints[i]))
+            i = i + 1
+
+        rospy.loginfo('Speeds ' + speeds)
 
         # create and publish ros message
         h = Header()

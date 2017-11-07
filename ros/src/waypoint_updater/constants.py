@@ -1,0 +1,5 @@
+MAX_JERK = 10 # m/s/s/s
+MAX_ACCEL= 10 # m/s/s
+
+EXPECTED_JERK_IN_ONE_SEC = 2 # m/s/s
+EXPECTED_ACC_IN_ONE_SEC = 1 # m/s
