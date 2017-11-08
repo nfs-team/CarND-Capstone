@@ -49,13 +49,20 @@ class WaypointUpdater(object):
         self.current_velocity = None
         self.velocity_updater = VelocityUpdater(25, rospy)
         self.traffic_light = None
-        rospy.spin()
+        self.loop()
+        #rospy.spin()
+
+
+    def loop(self):
+        rate = rospy.Rate(10) # 10Hz
+        while not rospy.is_shutdown():
+            self.publish_waypoints()
 
     def pose_cb(self, msg):
         # TODO: Implement
         rospy.loginfo('current_pose callback received, position: %f', msg.pose.position.x)
         self.current_position = msg.pose.position
-        self.publish_waypoints()
+
 
     def vel_cb(self, msg):
         rospy.loginfo('current_velocity callback received, velocity: %f', msg.twist.linear.x)
