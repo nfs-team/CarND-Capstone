@@ -108,8 +108,10 @@ class WaypointUpdater(object):
         if self.traffic_light is None:
             self.velocity_updater.update(next_waypoints, self.current_velocity, None)
         else:
-            self.velocity_updater.update(next_waypoints, self.current_velocity,
-                                         self.traffic_light - next_waypoint_index)
+            tf_relative_position = self.traffic_light - next_waypoint_index
+            if tf_relative_position > 200 or tf_relative_position < 0:
+                tf_relative_position = 0
+            self.velocity_updater.update(next_waypoints, self.current_velocity, tf_relative_position)
 
 
         i = 0

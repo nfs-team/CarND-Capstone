@@ -32,6 +32,12 @@ class VelocityUpdater(object):
             end_v = 0
 
         distance = self.distance(waypoints, 0, end_ind)
+
+        if distance < 0.001:
+            for wp_ind in range(len(waypoints)):
+                self.set_waypoint_velocity(waypoints, wp_ind, 0)
+            return 
+
         max_t = 10
         if abs(velocity+end_v)/2 > 0.1:
             max_t = distance / (abs(velocity+end_v)/8) #self.max_velocity
@@ -67,9 +73,9 @@ class VelocityUpdater(object):
             for wp_ind in range(end_ind+1, len(waypoints)):
                 self.set_waypoint_velocity(waypoints, wp_ind, 0)
 
-        print "velocity start={} end={} time={} cost={}".format(trajectory.start[1], trajectory.end[1], trajectory.time, trajectory.cost())
-        print "velocity {}+{}*t+{}*t^2+{}*t^3+{}*t^4+{}*t^5".format(trajectory.a[0], trajectory.a[1], trajectory.a[2], trajectory.a[3], trajectory.a[4], trajectory.a[5])
-        # for
+        # print "velocity start={} end={} time={} cost={}".format(trajectory.start[1], trajectory.end[1], trajectory.time, trajectory.cost())
+        # print "velocity {}+{}*t+{}*t^2+{}*t^3+{}*t^4+{}*t^5".format(trajectory.a[0], trajectory.a[1], trajectory.a[2], trajectory.a[3], trajectory.a[4], trajectory.a[5])
+        # # for
         #     max_t = distance / self.max_velocity
         #
         #
