@@ -15,11 +15,11 @@ import numpy as np
 STATE_COUNT_THRESHOLD = 3
 
 # Path to frozen detection graph. This is the actual model that is used for the object detection.
-ssd_inception_sim_model = 'light_classification/frozen_models/frozen_sim_inception/frozen_inference_graph.pb'
-ssd_inception_real_model = 'light_classification/frozen_models/frozen_real_inception/frozen_inference_graph.pb'
+#ssd_inception_sim_model = 'light_classification/frozen_models/frozen_sim_inception/frozen_inference_graph.pb'
+#ssd_inception_real_model = 'light_classification/frozen_models/frozen_real_inception/frozen_inference_graph.pb'
 
 #TODO: Change this model when running in read world
-PATH_TO_CKPT = ssd_inception_sim_model
+#PATH_TO_CKPT = ssd_inception_sim_model
 
 class TLDetector(object):
     def __init__(self):
@@ -29,8 +29,9 @@ class TLDetector(object):
         self.camera_image = None
         self.lights = []
 
+        ssd_inception_model = rospy.get_param('~ssd_inception_model')
+        self.light_classifier = TLClassifier(ssd_inception_model)
 
-        self.light_classifier = TLClassifier(PATH_TO_CKPT)
         rospy.loginfo("Setup TL Classifier")
 
         sub1 = rospy.Subscriber('/current_pose', PoseStamped, self.pose_cb)
@@ -59,7 +60,6 @@ class TLDetector(object):
         self.last_state = TrafficLight.UNKNOWN
         self.last_wp = -1
         self.state_count = 0
-
 
         rospy.spin()
 
