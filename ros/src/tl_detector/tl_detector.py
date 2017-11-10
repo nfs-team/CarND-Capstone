@@ -21,6 +21,8 @@ STATE_COUNT_THRESHOLD = 3
 #TODO: Change this model when running in read world
 #PATH_TO_CKPT = ssd_inception_sim_model
 
+LOOKAHEAD_WPS = 200
+
 class TLDetector(object):
     def __init__(self):
         rospy.init_node('tl_detector')
@@ -61,6 +63,8 @@ class TLDetector(object):
         self.last_wp = -1
         self.state_count = 0
 
+        self.stop_line_wps = None
+
         rospy.spin()
 
     def pose_cb(self, msg):
@@ -68,6 +72,7 @@ class TLDetector(object):
 
     def waypoints_cb(self, msg):
         self.waypoints = msg.waypoints
+        self.stop_line_wps = None
 
     def traffic_cb(self, msg):
         self.lights = msg.lights
@@ -133,25 +138,36 @@ class TLDetector(object):
         """Determines wp index of the closest traffic light. Probably we can assume that waypoints and traffic lights
         are not changing over time so we could make connections between waypoints and traffic lights once and then reuse it
         """
-        #TODO: if we have performance problem we probably would need to rewrite this using assumption of constant waypoints and tf
+
+        # Init connection between stop lines and waypoints
+        if self.stop_line_wps is None:
+            self.init_stop_line_waypoint_positions(stop_line_positions)
 
         closest_tf_wp = None
         closest_tf = None
 
-        for stop_line_position in stop_line_positions:
-            tf_pose = Pose()
-            tf_pose.position.x = stop_line_position[0]
-            tf_pose.position.y = stop_line_position[1]
-            # Find waypoint index corresponding to traffic light
-            tf_wp = self.get_closest_waypoint(tf_pose)
-
+        # Look for closest traffic light ahead of the car
+        for stop_line_position, tf_wp in self.stop_line_wps:
             # Check traffic lights only ahead of the car
             if tf_wp >= current_car_wp:
                 if closest_tf_wp is None or tf_wp < closest_tf_wp:
                     closest_tf_wp = tf_wp
                     closest_tf = stop_line_position
 
+        if closest_tf_wp-current_car_wp > LOOKAHEAD_WPS:
+            return -1, None
+
         return closest_tf_wp, closest_tf
+
+    def init_stop_line_waypoint_positions(self, stop_line_positions):
+        self.stop_line_wps = []
+        for stop_line_position in stop_line_positions:
+            tf_pose = Pose()
+            tf_pose.position.x = stop_line_position[0]
+            tf_pose.position.y = stop_line_position[1]
+            # Find waypoint index corresponding to traffic light
+            tf_wp = self.get_closest_waypoint(tf_pose)
+            self.stop_line_wps.append((stop_line_position, tf_wp))
 
     def get_light_state(self):
         """Determines the current color of the traffic light
