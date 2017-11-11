@@ -13,6 +13,10 @@ class TLClassifier(object):
 
     def __init__(self, model_file_path):
 
+        # Config to turn on JIT compilation
+        config = tf.ConfigProto()
+        config.graph_options.optimizer_options.global_jit_level = tf.OptimizerOptions.ON_1
+
         #Initialize conv net
         detection_graph = tf.Graph()
         with detection_graph.as_default():
@@ -24,7 +28,7 @@ class TLClassifier(object):
 
         #Initialize tensorflow session
         with detection_graph.as_default():
-            sess = tf.Session(graph=detection_graph)
+            sess = tf.Session(graph=detection_graph, config  = config)
         self._sess = sess
 
         #store tensors to run graph
