@@ -11,8 +11,7 @@ import tf
 import cv2
 import yaml
 import numpy as np
-
-STATE_COUNT_THRESHOLD = 3
+#from remote_detector.tl_detector_client import TLClassifierClient
 
 # Path to frozen detection graph. This is the actual model that is used for the object detection.
 #ssd_inception_sim_model = 'light_classification/frozen_models/frozen_sim_inception/frozen_inference_graph.pb'
@@ -22,6 +21,7 @@ STATE_COUNT_THRESHOLD = 3
 #PATH_TO_CKPT = ssd_inception_sim_model
 
 LOOKAHEAD_WPS = 200
+STATE_COUNT_THRESHOLD = 3
 
 class TLDetector(object):
     def __init__(self):
@@ -33,6 +33,7 @@ class TLDetector(object):
 
         ssd_inception_model = rospy.get_param('~ssd_inception_model')
         self.light_classifier = TLClassifier(ssd_inception_model)
+        #self.light_classifier = TLClassifierClient()
 
         rospy.loginfo("Setup TL Classifier")
 
@@ -154,7 +155,7 @@ class TLDetector(object):
                     closest_tf_wp = tf_wp
                     closest_tf = stop_line_position
 
-        if closest_tf_wp-current_car_wp > LOOKAHEAD_WPS:
+        if closest_tf_wp is None or current_car_wp is None or closest_tf_wp-current_car_wp > LOOKAHEAD_WPS:
             return -1, None
 
         return closest_tf_wp, closest_tf
