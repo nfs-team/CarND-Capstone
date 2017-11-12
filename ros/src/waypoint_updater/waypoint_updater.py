@@ -44,10 +44,12 @@ class WaypointUpdater(object):
         rospy.Subscriber('/current_velocity', TwistStamped, self.vel_cb)
 
         # TODO: Add other member variables you need below
+        self.max_speed = self.kmph2mps(rospy.get_param('~/waypoint_loader/velocity'))
+
         self.waypoints = None
         self.current_position = None
         self.current_velocity = None
-        self.velocity_updater = VelocityUpdater(25, rospy)
+        self.velocity_updater = VelocityUpdater(self.max_speed, rospy)
         self.traffic_light = None
         self.loop()
         #rospy.spin()
@@ -60,24 +62,24 @@ class WaypointUpdater(object):
 
     def pose_cb(self, msg):
         # TODO: Implement
-        rospy.loginfo('current_pose callback received, position: %f', msg.pose.position.x)
+        #rospy.loginfo('current_pose callback received, position: %f', msg.pose.position.x)
         self.current_position = msg.pose.position
 
 
     def vel_cb(self, msg):
-        rospy.loginfo('current_velocity callback received, velocity: %f', msg.twist.linear.x)
+        #rospy.loginfo('current_velocity callback received, velocity: %f', msg.twist.linear.x)
         self.current_velocity = msg.twist.linear.x
 
     def waypoints_cb(self, msg):
         # TODO: Implement
-        rospy.loginfo('base_waypoints callback received.')
+        #rospy.loginfo('base_waypoints callback received.')
 
         if self.waypoints is None:
             self.waypoints = msg.waypoints
 
     def traffic_cb(self, msg):
         # TODO: Callback for /traffic_waypoint message. Implement
-        rospy.loginfo('traffic_waypoint callback received. %d', msg.data)
+        #rospy.loginfo('traffic_waypoint callback received. %d', msg.data)
         if msg.data < 0:
             self.traffic_light = None
         else:
@@ -101,15 +103,13 @@ class WaypointUpdater(object):
         # rospy.loginfo('num next_waypoints %d', len(next_waypoints))
 
 
-        rospy.loginfo('Distance = %d', self.distance(next_waypoints, 0, len(next_waypoints)-1))
-
-        self.max_speed = rospy.get_param('~/waypoint_loader/velocity')
+        #rospy.loginfo('Distance = %d', self.distance(next_waypoints, 0, len(next_waypoints)-1))
 
         if self.traffic_light is None:
             self.velocity_updater.update(next_waypoints, self.current_velocity, None)
         else:
             tf_relative_position = self.traffic_light - next_waypoint_index
-            if tf_relative_position > 200 or tf_relative_position < 0:
+            if tf_relative_position > LOOKAHEAD_WPS or tf_relative_position < 0:
                 tf_relative_position = 0
             self.velocity_updater.update(next_waypoints, self.current_velocity, tf_relative_position)
 
@@ -120,7 +120,7 @@ class WaypointUpdater(object):
             speeds = speeds + "{0:.2f} ".format(self.get_waypoint_velocity(next_waypoints[i]))
             i = i + 1
 
-        rospy.loginfo('Speeds ' + speeds)
+        #rospy.loginfo('Speeds ' + speeds)
 
         # create and publish ros message
         h = Header()
@@ -173,6 +173,9 @@ class WaypointUpdater(object):
         # yaw = euler[2]
 
         return euler[2]
+
+    def kmph2mps(self, velocity_kmph):
+        return (velocity_kmph * 1000.) / (60. * 60.)
 
     def get_waypoint_velocity(self, waypoint):
         return waypoint.twist.twist.linear.x

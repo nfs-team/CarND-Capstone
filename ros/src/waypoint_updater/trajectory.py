@@ -65,8 +65,6 @@ class Trajectory(object):
             end[1] - c_1,
             end[2] - c_2
         ])
-        print "start {} {} {}".format(start[0], start[1], start[2])
-        print "end {} {} {}".format(end[0], end[1], end[2])
 
         a_3_4_5 = np.linalg.solve(A, B)
         alphas = np.concatenate([np.array([a_0, a_1, a_2]), a_3_4_5])
