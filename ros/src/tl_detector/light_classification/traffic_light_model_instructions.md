@@ -24,9 +24,7 @@ $ cd ~/tensorflow
 $ git clone https://github.com/tensorflow/models.git
 ```
 
-Read this [README](https://github.com/tensorflow/models/tree/master/research/
-object_detection). Then go to the link labeled [Installation](https://github.com/
-tensorflow/models/blob/master/research/object_detection/g3doc/installation.md).
+Read this [README](https://github.com/tensorflow/models/tree/master/research/object_detection). Then go to the link labeled [Installation](https://github.com/tensorflow/models/blob/master/research/object_detection/g3doc/installation.md).
 Go back to your home directory and start the conda environment.
 
 ```
@@ -47,8 +45,7 @@ annotations provided by Anthony Sarkis. Anthony Sarkis shares them at this link
 https://drive.google.com/file/d/0B-Eiyn-CUQtxdUZWMkFfQzdObUE/view. You can also
 get them from me at https://drive.google.com/file/d/18Zvg-qY43T4_MpyqHvEdkXekDZQNZzXR/view?usp=sharing.
 
-Extract the directory "data" inside the ZIP file to the directory
-"~/tensorflow/models/research". You should now have a directory
+Extract the directory "data" inside the ZIP file to the directory "~/tensorflow/models/research". You should now have a directory
 "~/tensorflow/models/research/data/real_training_data" and "~/tensorflow/models/research/data/sim_training_data". Do not use the files real_data.record or
 sim_data.record. You have to make your own TFRecord (.record) files. I will tell
 you what to do in the next paragraph, but if you want more information about
@@ -126,7 +123,7 @@ Real Data Based Model
 
 ```
 $ cd ~/tensorflow/models/research
-$ python object_detection/export_inference_graph.py --pipeline_config_path=config/ssd_inception-traffic_udacity_real.config --trained_checkpoint_prefix=data/real_training_data/model.ckpt-10000 --output_directory=frozen_models/frozen_real_inception/
+$ python object_detection/export_inference_graph.py --pipeline_config_path=config/ssd_inception-traffic_udacity_real.config --trained_checkpoint_prefix=data/real_training_data/model.ckpt-10000 --output_directory=frozen_models/frozen_real_inception
 ```
 
 Download the directory "frozen_models", which has frozen_real_inception and
