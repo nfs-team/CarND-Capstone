@@ -2,7 +2,9 @@
 Traffic Light Localizing and Identifying
 
 Justin Watson
+
 11 Nov. 2017
+
 Team Need For Speed, Udacity, cohort Term 3 Aug. 31
 
 # Training on AWS
@@ -14,7 +16,7 @@ Create an EC2 instance of udacity-carnd-advanced-deep-learning.
 
 Start the EC2 instance that you just made.
 
-You can now connect to the instance via putty or SCP by using the Public DNS
+You can now connect to the instance via PuTTY or SCP by using the Public DNS
 (IPv4). The username is "ubuntu". There is no password for the "ubuntu" account.
 
 Install the repository model/tensorflow repository. Follow these commands:
@@ -45,8 +47,7 @@ annotations provided by Anthony Sarkis. Anthony Sarkis shares them at this link
 https://drive.google.com/file/d/0B-Eiyn-CUQtxdUZWMkFfQzdObUE/view. You can also
 get them from me at https://drive.google.com/file/d/18Zvg-qY43T4_MpyqHvEdkXekDZQNZzXR/view?usp=sharing.
 
-Extract the directory "data" inside the ZIP file to the directory "~/tensorflow/models/research". You should now have a directory
-"~/tensorflow/models/research/data/real_training_data" and "~/tensorflow/models/research/data/sim_training_data". Do not use the files real_data.record or
+Extract the directory "data" inside the ZIP file to the directory "~/tensorflow/models/research". You should now have a directory "~/tensorflow/models/research/data/real_training_data" and "~/tensorflow/models/research/data/sim_training_data". Do not use the files real_data.record or
 sim_data.record. You have to make your own TFRecord (.record) files. I will tell
 you what to do in the next paragraph, but if you want more information about
 what you are doing go to https://github.com/tensorflow/models/blob/master/research/object_detection/g3doc/preparing_inputs.md.
