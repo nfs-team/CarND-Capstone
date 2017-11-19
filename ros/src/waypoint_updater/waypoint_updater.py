@@ -106,17 +106,17 @@ class WaypointUpdater(object):
         #rospy.loginfo('Distance = %d', self.distance(next_waypoints, 0, len(next_waypoints)-1))
 
         if self.traffic_light is None:
-            self.velocity_updater.update(next_waypoints, self.current_velocity, None)
+            self.velocity_updater.update(next_waypoints, next_waypoint_index, self.current_velocity, None)
         else:
             tf_relative_position = self.traffic_light - next_waypoint_index
             if tf_relative_position > LOOKAHEAD_WPS or tf_relative_position < 0:
-                tf_relative_position = 0
-            self.velocity_updater.update(next_waypoints, self.current_velocity, tf_relative_position)
+                tf_relative_position = None
+            self.velocity_updater.update(next_waypoints, next_waypoint_index, self.current_velocity, tf_relative_position)
 
 
         i = 0
         speeds = ''
-        while i < len(next_waypoints):
+        while i < 20: #len(next_waypoints):
             speeds = speeds + "{0:.2f} ".format(self.get_waypoint_velocity(next_waypoints[i]))
             i = i + 1
 
@@ -130,7 +130,7 @@ class WaypointUpdater(object):
         msg.waypoints = next_waypoints
         self.final_waypoints_pub.publish(msg)
 
-        rospy.loginfo('published final_waypoints')
+       # rospy.loginfo('published final_waypoints')
 
 
 
