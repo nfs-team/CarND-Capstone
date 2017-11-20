@@ -4,7 +4,7 @@ WEIGHTED_COST_FUNCTIONS = [
     (min_velocity_cost, 10000),
     (max_velocity_cost, 10000),
     (efficiency_cost,   1),
-    (total_efficiency_cost, 3),
+    (total_efficiency_cost, 15),
     (max_jerk_cost,     1000),
     (total_jerk_cost,   1),
     (max_accel_cost,    1000),
