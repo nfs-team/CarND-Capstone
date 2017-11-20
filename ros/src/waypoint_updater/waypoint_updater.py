@@ -116,11 +116,11 @@ class WaypointUpdater(object):
 
         i = 0
         speeds = ''
-        while i < 20: #len(next_waypoints):
+        while i < 10: #len(next_waypoints):
             speeds = speeds + "{0:.2f} ".format(self.get_waypoint_velocity(next_waypoints[i]))
             i = i + 1
 
-        #rospy.loginfo('Speeds ' + speeds)
+        rospy.loginfo('Speeds ' + speeds)
 
         # create and publish ros message
         h = Header()

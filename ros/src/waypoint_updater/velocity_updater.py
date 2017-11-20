@@ -164,7 +164,7 @@ class VelocityUpdater(object):
             trajectory = min(trajectories, key=lambda tr: tr.cost())
 
 
-            print "Trajectories={}, best={}, start={}, start_v={}, end={}, end_v={} ".format(len(trajectories), trajectory.cost(),
+            print "Trajectories={}, best={}, time={}, start={}, start_v={}, end={}, end_v={} ".format(len(trajectories), trajectory.cost(), trajectory.time,
                                                                                              trajectory.start[0], trajectory.start[1],
                                                                                              trajectory.end[0], trajectory.end[1])
 
