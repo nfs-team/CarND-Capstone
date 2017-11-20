@@ -27,7 +27,7 @@ class Controller(object):
 	self.min_speed = 0
 
         self.yaw_controller = YawController(wheel_base, steer_ratio, self.min_speed, max_lat_accel, max_steer_angle)
-	self.pid = PID(kp=0.8, ki=0.0, kd=0.05, mn=self.decel_limit, mx=self.accel_limit)
+	self.pid = PID(kp=1.0, ki=0.0, kd=0.05, mn=self.decel_limit, mx=self.accel_limit)
 	self.lowpass = LowPassFilter(0.2, 1.0)	
 
     def control(self, proposed_linear_velocity, proposed_angular_velocity, 
@@ -46,24 +46,5 @@ class Controller(object):
 	if throttle < 0.0:
 	    brake = abs((self.vehicle_mass + self.fuel_capacity * GAS_DENSITY) * self.wheel_radius * throttle )
 	    throttle = 0.0 
-	
 
-	#if steer > self.max_steer_angle:
-	#    steer = self.max_steer_angle
-
-	#v_delta = proposed_linear_velocity - current_linear_velocity
-	#accel = v_delta / 0.5
-	#if accel > 0:
-	#    accel = min(self.accel_limit, accel)
-	#    throttle = accel / self.accel_limit
-	#    brake = 0.0 
-        #else:
-	#    #TODO: replace with self.decel limit? 
-	#    accel = max(self.accel_limit, accel) 
-	#    throttle = 0.0 	
-	#    brake = abs(self.vehicle_mass * accel * self.wheel_radius)
-	
-	#throttle = 0.5
-	#brake = 0.0
-	print(throttle, brake, steer)
         return throttle, brake, steer
