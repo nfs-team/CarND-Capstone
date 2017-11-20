@@ -11,7 +11,7 @@ import tf
 import cv2
 import yaml
 import numpy as np
-#from remote_detector.tl_detector_client import TLClassifierClient
+from remote_detector.tl_detector_client import TLClassifierClient
 
 # Path to frozen detection graph. This is the actual model that is used for the object detection.
 #ssd_inception_sim_model = 'light_classification/frozen_models/frozen_sim_inception/frozen_inference_graph.pb'
@@ -21,7 +21,7 @@ import numpy as np
 #PATH_TO_CKPT = ssd_inception_sim_model
 
 LOOKAHEAD_WPS = 200
-STATE_COUNT_THRESHOLD = 3
+STATE_COUNT_THRESHOLD = 1
 
 class TLDetector(object):
     def __init__(self):
@@ -32,8 +32,12 @@ class TLDetector(object):
         self.lights = []
 
         ssd_inception_model = rospy.get_param('~ssd_inception_model')
-        self.light_classifier = TLClassifier(ssd_inception_model)
-        #self.light_classifier = TLClassifierClient()
+        self.detection_mode = rospy.get_param('~mode') #normal, remote, test
+        self.light_classifier = None
+        if self.detection_mode == "normal":
+            self.light_classifier = TLClassifier(ssd_inception_model)
+        elif self.detection_mode == "remote":
+            self.light_classifier = TLClassifierClient()
 
         rospy.loginfo("Setup TL Classifier")
 
@@ -63,6 +67,9 @@ class TLDetector(object):
         self.last_state = TrafficLight.UNKNOWN
         self.last_wp = -1
         self.state_count = 0
+
+        self.wait_redlight = 0
+        self.wait_redlight_limit = 50
 
         self.stop_line_wps = None
 
@@ -204,21 +211,34 @@ class TLDetector(object):
         debug = True
         # List of positions that correspond to the line to stop in front of for a given intersection
         stop_line_positions = self.config['stop_line_positions']
+
         if(self.pose):
             car_position_wp = self.get_closest_waypoint(self.pose.pose)
             light_wp, _ = self.get_closest_traffic_light(stop_line_positions, car_position_wp)
-            if light_wp != -1:
-                light = self.get_light_state()
-                if debug:
-                    if light == TrafficLight.GREEN:
-                        lightstr = 'green'
-                    elif light == TrafficLight.RED:
-                        lightstr = 'red'
-                    elif light == TrafficLight.YELLOW:
-                        lightstr = 'yellow'
-                    elif light == TrafficLight.UNKNOWN:
-                        lightstr = 'unknown'
-                    rospy.loginfo("car light status: %s", lightstr)
+            if self.detection_mode == "test":
+                if light_wp is not None and car_position_wp is not None:
+                    if abs(light_wp - car_position_wp) >= 5:
+                        light = TrafficLight.RED
+                        self.wait_redlight = 0
+                    else:
+                        if self.wait_redlight > self.wait_redlight_limit:
+                            light = TrafficLight.GREEN
+                        else:
+                            light = TrafficLight.RED
+                        self.wait_redlight += 1
+            else:
+                if light_wp != -1:
+                    light = self.get_light_state()
+                    if debug:
+                        if light == TrafficLight.GREEN:
+                            lightstr = 'green'
+                        elif light == TrafficLight.RED:
+                            lightstr = 'red'
+                        elif light == TrafficLight.YELLOW:
+                            lightstr = 'yellow'
+                        elif light == TrafficLight.UNKNOWN:
+                            lightstr = 'unknown'
+                        rospy.loginfo("car light status: %s", lightstr)
 
         return light_wp, light
 
