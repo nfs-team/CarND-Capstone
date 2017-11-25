@@ -31,6 +31,7 @@ that we have created in the `__init__` function.
 
 '''
 
+
 class DBWNode(object):
     def __init__(self):
         rospy.init_node('dbw_node')
@@ -53,23 +54,23 @@ class DBWNode(object):
         self.brake_pub = rospy.Publisher('/vehicle/brake_cmd',
                                          BrakeCmd, queue_size=1)
 
-        #min_speed = 0.0
+        # min_speed = 0.0
 
-	self.rate = 10 # in Hz, don't forget to change to 50 later
+        self.rate = 10  # in Hz, don't forget to change to 50 later
 
         # TODO: Create `TwistController` object
         self.controller = Controller(
-		vehicle_mass=vehicle_mass,
-		fuel_capacity=fuel_capacity,
-		brake_deadband=brake_deadband,
-		decel_limit=decel_limit,
-		accel_limit=accel_limit,
-		wheel_radius=wheel_radius,
-		wheel_base=wheel_base,
-		steer_ratio=steer_ratio,
-		max_lat_accel=max_lat_accel,
-		max_steer_angle=max_steer_angle
-	)
+            vehicle_mass=vehicle_mass,
+            fuel_capacity=fuel_capacity,
+            brake_deadband=brake_deadband,
+            decel_limit=decel_limit,
+            accel_limit=accel_limit,
+            wheel_radius=wheel_radius,
+            wheel_base=wheel_base,
+            steer_ratio=steer_ratio,
+            max_lat_accel=max_lat_accel,
+            max_steer_angle=max_steer_angle
+        )
 
         # TODO: Subscribe to all the topics you need to
         self.sub_twist = rospy.Subscriber('/twist_cmd', TwistStamped, self.cb_twistmsg)
@@ -80,31 +81,33 @@ class DBWNode(object):
         self.dbw_is_enabled = True
 
         self.current_linear_velocity = None
-	self.current_angular_velocity = None
+        self.current_angular_velocity = None
         self.proposed_linear_velocity = None
         self.proposed_angular_velocity = None
-	self.previous_time = rospy.get_rostime()
+        self.previous_time = rospy.get_rostime()
 
         self.loop()
 
     def loop(self):
         rate = rospy.Rate(self.rate)
         while not rospy.is_shutdown():
-	    # getting time step for PID controllers
-	    this_time = rospy.get_rostime()
-	    time_step = (this_time-self.previous_time).secs + 1e-9*(this_time - self.previous_time).nsecs
-	    self.previous_time = this_time
+            # getting time step for PID controllers
+            this_time = rospy.get_rostime()
+            time_step = (this_time - self.previous_time).secs + 1e-9 * (this_time - self.previous_time).nsecs
+            self.previous_time = this_time
 
             if self.current_linear_velocity is None or self.proposed_linear_velocity is None:
-		continue
+                continue
 
-	    if self.dbw_is_enabled:
+            if self.dbw_is_enabled:
                 throttle, brake, steering = self.controller.control(self.proposed_linear_velocity,
                                                                     self.proposed_angular_velocity,
                                                                     self.current_linear_velocity,
-								    self.current_angular_velocity,
-								    time_step)
+                                                                    self.current_angular_velocity,
+                                                                    time_step)
                 self.publish(throttle, brake, steering)
+            else:
+                self.controller.reset();
             rate.sleep()
 
     def publish(self, throttle, brake, steer):
@@ -135,6 +138,7 @@ class DBWNode(object):
 
     def cb_currvel(self, msg):
         self.current_linear_velocity = msg.twist.linear.x
+
 
 if __name__ == '__main__':
     DBWNode()

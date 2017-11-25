@@ -33,9 +33,6 @@ class Controller(object):
                 current_linear_velocity, current_angular_velocity, time_step=None):
         # TODO: Why do we even need angular velocity?
 
-        if not dbw_enabled:
-            self.pid.reset()
-
         proposed_angular_velocity = self.lowpass.filt(proposed_angular_velocity)
         steer = self.yaw_controller.get_steering(proposed_linear_velocity, proposed_angular_velocity,
                                                  current_linear_velocity)
@@ -50,3 +47,6 @@ class Controller(object):
             throttle = 0.0
 
         return throttle, brake, steer
+
+    def reset(self):
+        self.pid.reset();

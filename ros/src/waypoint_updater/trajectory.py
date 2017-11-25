@@ -6,9 +6,9 @@ WEIGHTED_COST_FUNCTIONS = [
     (efficiency_cost,   1),
     (total_efficiency_cost, 5),
     (max_jerk_cost,     1000),
-    (total_jerk_cost,   1),
+    (total_jerk_cost,   0.1),
     (max_accel_cost,    1000),
-    (total_accel_cost,  1),
+    (total_accel_cost,  0.1),
 ]
 
 class Trajectory(object):
