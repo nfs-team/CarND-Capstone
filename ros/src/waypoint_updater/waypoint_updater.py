@@ -26,8 +26,10 @@ as well as to verify your TL classifier.
 TODO (for Yousuf and Aaron): Stopline location for each traffic light.
 '''
 
-LOOKAHEAD_WPS = 200 # Number of waypoints we will publish. You can change this number
-
+#LOOKAHEAD_WPS = 200 # Number of waypoints we will publish. You can change this number
+LOOKAHEAD_WPS = 40 # Number of waypoints we will publish. You can change this number
+STOPPING_DIST = 1.
+MAX_DECEL = 1.
 
 class WaypointUpdater(object):
     def __init__(self):
@@ -45,6 +47,9 @@ class WaypointUpdater(object):
 
         # TODO: Add other member variables you need below
         self.max_speed = self.kmph2mps(rospy.get_param('~/waypoint_loader/velocity'))
+
+
+        self.mode = rospy.get_param('~mode', 'linear')
 
         self.waypoints = None
         self.current_position = None
@@ -99,19 +104,32 @@ class WaypointUpdater(object):
         next_waypoint_index = self.next_waypoint(self.current_position)
         # rospy.loginfo('next_waypoint_index = %d', next_waypoint_index)
 
-        next_waypoints = self.waypoints[next_waypoint_index:min(next_waypoint_index+LOOKAHEAD_WPS, len(self.waypoints))]
+        last_waypoint_index = min(next_waypoint_index+LOOKAHEAD_WPS, len(self.waypoints))
+        next_waypoints = self.waypoints[next_waypoint_index:last_waypoint_index]
+
         # rospy.loginfo('num next_waypoints %d', len(next_waypoints))
 
 
         #rospy.loginfo('Distance = %d', self.distance(next_waypoints, 0, len(next_waypoints)-1))
 
-        if self.traffic_light is None:
-            self.velocity_updater.update(next_waypoints, next_waypoint_index, self.current_velocity, None)
-        else:
-            tf_relative_position = self.traffic_light - next_waypoint_index
-            if tf_relative_position > LOOKAHEAD_WPS or tf_relative_position < 0:
-                tf_relative_position = None
-            self.velocity_updater.update(next_waypoints, next_waypoint_index, self.current_velocity, tf_relative_position)
+        if self.mode == 'linear':
+            if self.traffic_light is not None:
+                tf_relative_position = self.traffic_light - next_waypoint_index
+                if tf_relative_position <= LOOKAHEAD_WPS and tf_relative_position > 0:
+                    rospy.logwarn('slowing down')
+                    slow_down_waypoints = self.waypoints[next_waypoint_index:self.traffic_light + 1]
+                    self.decelerate(slow_down_waypoints)
+            else:
+                for wpidx in range(next_waypoint_index, last_waypoint_index):
+                    self.set_waypoint_velocity(self.waypoints, wpidx, self.max_speed)
+        elif self.mode == 'JMT':
+            if self.traffic_light is None:
+                self.velocity_updater.update(next_waypoints, next_waypoint_index, self.current_velocity, None)
+            else:
+                tf_relative_position = self.traffic_light - next_waypoint_index
+                if tf_relative_position > LOOKAHEAD_WPS or tf_relative_position < 0:
+                    tf_relative_position = None
+                self.velocity_updater.update(next_waypoints, next_waypoint_index, self.current_velocity, tf_relative_position)
 
 
         i = 0
@@ -190,6 +208,21 @@ class WaypointUpdater(object):
             dist += dl(waypoints[wp1].pose.pose.position, waypoints[i].pose.pose.position)
             wp1 = i
         return dist
+
+    def distance_positions(self, p1, p2):
+        x, y, z = p1.x - p2.x, p1.y - p2.y, p1.z - p2.z
+        return math.sqrt(x*x + y*y + z*z)
+
+    def decelerate(self, waypoints):
+        last = waypoints[-1]
+        last.twist.twist.linear.x = 0.
+        for wp in waypoints[:-1][::-1]:
+            dist = max( self.distance_positions(wp.pose.pose.position, last.pose.pose.position) - STOPPING_DIST, 0)
+            vel = math.sqrt(2 * MAX_DECEL * dist)
+            if vel < 1.:
+                vel = 0.
+            wp.twist.twist.linear.x = min(vel, wp.twist.twist.linear.x)
+        return waypoints
 
 
 if __name__ == '__main__':
