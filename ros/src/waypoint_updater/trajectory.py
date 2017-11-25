@@ -6,9 +6,9 @@ WEIGHTED_COST_FUNCTIONS = [
     (efficiency_cost,   1),
     (total_efficiency_cost, 5),
     (max_jerk_cost,     1000),
-    (total_jerk_cost,   0.1),
+    (total_jerk_cost,   1),
     (max_accel_cost,    1000),
-    (total_accel_cost,  0.1),
+    (total_accel_cost,  1),
 ]
 
 class Trajectory(object):
@@ -20,6 +20,7 @@ class Trajectory(object):
         self.full_distance = full_distance
         self.a = self.JMT(start, end, time)
         self._cost = None
+        self._costs = []
 
     def cost(self):
         if self._cost is None:
@@ -77,6 +78,7 @@ class Trajectory(object):
         for cf, weight in cost_functions_with_weights:
             new_cost = weight * cf(self.a, self.max_v, self.time, self)
             cost += new_cost
+            self._costs.append((cf.__name__, new_cost))
             if verbose:
                 print "cost for {} is \t {}".format(cf.func_name, new_cost)
         return cost

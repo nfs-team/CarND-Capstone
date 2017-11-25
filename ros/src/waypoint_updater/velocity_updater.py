@@ -13,7 +13,7 @@ MAX_ACCEL = 10 # m/s/s
 #MAX_T = 10
 
 T_STEPS = 10
-DISTANCE_STEPS = 5
+DISTANCE_STEPS = 10
 
 DEBUG_OUTPUT=False
 
@@ -81,6 +81,9 @@ class VelocityUpdater(object):
 
             distance = self.distance(waypoints, 0, end_ind)
 
+            if end_v < 0:
+                distance -= 2.
+
             if distance < 0.001:
                 for wp_ind in range(len(waypoints)):
                     self.set_waypoint_velocity(waypoints, wp_ind, 0)
@@ -91,9 +94,9 @@ class VelocityUpdater(object):
                     self.velocities.append(self.get_waypoint_velocity(waypoints[i]))
                 return
 
-            if distance > 0.1:
+            if distance > 0.5:
                 if velocity <= 0.1:
-                    velocity = 0.1
+                    velocity = 0.5
 
             start = [0, velocity, 0]
 
@@ -118,8 +121,8 @@ class VelocityUpdater(object):
                 for j in range(DISTANCE_STEPS):
                     distance_ = distance *(j+1)/DISTANCE_STEPS
                     max_t = distance_ / (self.max_velocity/8)
-                    if abs(velocity+end_v)/2 > 0.1:
-                        max_t = distance_ / (abs(velocity+end_v)/4) #self.max_velocity
+                #    if abs(velocity+end_v)/2 > 0.1:
+                #        max_t = distance_ / (abs(velocity+end_v)/4) #self.max_velocity
                     for i in range(T_STEPS):
                         trajectory = Trajectory(start, [distance_, end_v, 0], (i + 1) * max_t / T_STEPS, self.max_velocity, distance)
                         trajectories.append(trajectory)
@@ -127,16 +130,16 @@ class VelocityUpdater(object):
                 for j in range(DISTANCE_STEPS):
                     distance_ = distance * (j + 1) / DISTANCE_STEPS
                     max_t = distance_ / (self.max_velocity / 8)
-                    if abs(velocity + end_v) / 2 > 0.1:
-                        max_t = distance_ / (abs(velocity + end_v) / 4)  # self.max_velocity
+               #     if abs(velocity + end_v) / 2 > 0.1:
+               #         max_t = distance_ / (abs(velocity + end_v) / 4)  # self.max_velocity
                     for i in range(T_STEPS):
                         start = [distance - distance_, velocity, 0]
                         trajectory = Trajectory(start, [distance, end_v, 0], (i + 1) * max_t / T_STEPS, self.max_velocity, distance)
                         trajectories.append(trajectory)
             else:
                 max_t = distance / (self.max_velocity/8)
-                if abs(velocity + end_v) / 2 > 0.1:
-                    max_t = distance / (abs(velocity + end_v) / 4)  # self.max_velocity
+           #     if abs(velocity + end_v) / 2 > 0.1:
+           #         max_t = distance / (abs(velocity + end_v) / 4)  # self.max_velocity
                 for i in range(T_STEPS):
                     trajectory = Trajectory(start, [distance, end_v, 0], (i + 1) * max_t / T_STEPS, self.max_velocity, distance)
                     trajectories.append(trajectory)
@@ -198,6 +201,9 @@ class VelocityUpdater(object):
 
             if DEBUG_OUTPUT:
                 self.draw_trajectories(trajectories, n=15)
+
+             #   for i in range(15):
+            #        print  trajectories[i]._costs
             # print "velocity start={} end={} time={} cost={}".format(trajectory.start[1], trajectory.end[1], trajectory.time, trajectory.cost())
             # print "velocity {}+{}*t+{}*t^2+{}*t^3+{}*t^4+{}*t^5".format(trajectory.a[0], trajectory.a[1], trajectory.a[2], trajectory.a[3], trajectory.a[4], trajectory.a[5])
             # # for
