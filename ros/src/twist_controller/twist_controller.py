@@ -1,5 +1,5 @@
 from yaw_controller import YawController
-from pid import PID 
+from pid import PID
 from lowpass import LowPassFilter
 
 
@@ -27,24 +27,24 @@ class Controller(object):
 	self.min_speed = 0
 
         self.yaw_controller = YawController(wheel_base, steer_ratio, self.min_speed, max_lat_accel, max_steer_angle)
-	self.pid = PID(kp=1.0, ki=0.0, kd=0.05, mn=self.decel_limit, mx=self.accel_limit)
-	self.lowpass = LowPassFilter(0.2, 1.0)	
+	self.pid = PID(kp=2.5, ki=0.0, kd=1.2, mn=self.decel_limit, mx=self.accel_limit)
+	self.lowpass = LowPassFilter(0.2, 1.0)
 
-    def control(self, proposed_linear_velocity, proposed_angular_velocity, 
+    def control(self, proposed_linear_velocity, proposed_angular_velocity,
 		current_linear_velocity, current_angular_velocity, time_step=None):
-        # TODO: Why do we even need angular velocity? 
+        # TODO: Why do we even need angular velocity?
 
         proposed_angular_velocity = self.lowpass.filt(proposed_angular_velocity)
 	steer = self.yaw_controller.get_steering(proposed_linear_velocity, proposed_angular_velocity,
                                                  current_linear_velocity)
-		
+
        	v_delta = proposed_linear_velocity - current_linear_velocity
 	throttle = self.pid.step(v_delta, time_step)
-	brake = 0.0 
+	brake = 0.0
 
-	# we want to brake 
+	# we want to brake
 	if throttle < 0.0:
 	    brake = abs((self.vehicle_mass + self.fuel_capacity * GAS_DENSITY) * self.wheel_radius * throttle )
-	    throttle = 0.0 
+	    throttle = 0.0
 
         return throttle, brake, steer
