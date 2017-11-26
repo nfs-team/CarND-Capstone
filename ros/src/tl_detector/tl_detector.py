@@ -20,7 +20,7 @@ from remote_detector.tl_detector_client import TLClassifierClient
 #TODO: Change this model when running in read world
 #PATH_TO_CKPT = ssd_inception_sim_model
 
-LOOKAHEAD_WPS = 200
+LOOKAHEAD_WPS = 60
 STATE_COUNT_THRESHOLD = 1
 
 class TLDetector(object):
@@ -38,6 +38,11 @@ class TLDetector(object):
             self.light_classifier = TLClassifier(ssd_inception_model)
         elif self.detection_mode == "remote":
             self.light_classifier = TLClassifierClient()
+
+        #Classify once to activate XLA JIT compiler. This step takes time.
+        #After this step the node detects lights faster and starts to publishes traffic light info
+        dummyImg = 255 * np.ones((1096, 1368, 3)).astype(np.uint8)
+        self.light_classifier.get_classification(dummyImg)
 
         rospy.loginfo("Setup TL Classifier")
 
@@ -191,10 +196,10 @@ class TLDetector(object):
         #Get classification
         cv_img = self.bridge.imgmsg_to_cv2(self.camera_image, "rgb8")
         np_img = np.array(cv_img)
-        beginT = rospy.get_time()
+        #beginT = rospy.get_time()
         status = self.light_classifier.get_classification(np_img)
-        endT = rospy.get_time()
-        rospy.loginfo("SSD Execution Time (ms): %f", (endT - beginT )* 1e3)
+        #endT = rospy.get_time()
+        #rospy.loginfo("SSD Execution Time (ms): %f", (endT - beginT )* 1e3)
         return status
 
     def process_traffic_lights(self):
