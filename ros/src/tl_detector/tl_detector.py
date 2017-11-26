@@ -41,8 +41,9 @@ class TLDetector(object):
 
         #Classify once to activate XLA JIT compiler. This step takes time.
         #After this step the node detects lights faster and starts to publishes traffic light info
-        dummyImg = 255 * np.ones((1096, 1368, 3)).astype(np.uint8)
-        self.light_classifier.get_classification(dummyImg)
+        if self.detection_mode != "test":
+            dummyImg = 255 * np.ones((1096, 1368, 3)).astype(np.uint8)
+            self.light_classifier.get_classification(dummyImg)
 
         rospy.loginfo("Setup TL Classifier")
 

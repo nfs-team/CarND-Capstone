@@ -96,7 +96,7 @@ class VelocityUpdater(object):
 
             if distance > 0.5:
                 if velocity <= 0.1:
-                    velocity = 0.5
+                    velocity = self.max_velocity / 2.
 
             start = [0, velocity, 0]
 
