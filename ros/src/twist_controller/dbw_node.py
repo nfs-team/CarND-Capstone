@@ -78,7 +78,7 @@ class DBWNode(object):
         self.sub_curr_vel = rospy.Subscriber('/current_velocity', TwistStamped, self.cb_currvel)
 
         # Current state variables
-        self.dbw_is_enabled = True
+        self.dbw_is_enabled = False
 
         self.current_linear_velocity = None
         self.current_angular_velocity = None
