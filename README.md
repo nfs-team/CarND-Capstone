@@ -7,6 +7,7 @@ This is the project repo for the final project of the Udacity Self-Driving Car N
 2. Justin Watson - jwatson5 (at) gmail.com
 3. Arvind jayaraman - jayaraman.arvind (at) gmail.com
 4. Yan Moisseev - moisseev.yan (at) gmail.com
+5. Ramesh Karpuram - rkkarpuram (at) hotmail.com
 
 ### Native Installation
 
