@@ -76,7 +76,7 @@ class VelocityUpdater(object):
                 end_v = self.max_velocity
             else:
                 #we need to slowdown
-                end_ind = traffic_light
+                end_ind = min(traffic_light, len(waypoints) - 1)
                 end_v = 0
 
             distance = self.distance(waypoints, 0, end_ind)
