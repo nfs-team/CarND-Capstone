@@ -56,7 +56,7 @@ class DBWNode(object):
 
         # min_speed = 0.0
 
-        self.rate = 10  # in Hz, don't forget to change to 50 later
+        self.rate = 50  # in Hz, don't forget to change to 50 later
 
         # TODO: Create `TwistController` object
         self.controller = Controller(
