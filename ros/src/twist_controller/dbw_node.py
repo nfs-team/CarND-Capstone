@@ -55,8 +55,8 @@ class DBWNode(object):
                                          BrakeCmd, queue_size=1)
 
         # min_speed = 0.0
-
-        self.rate = 50  # in Hz, don't forget to change to 50 later
+        # in Hz, don't forget to change to 50 later
+        self.rate = rospy.get_param('~rate', 50)
 
         # TODO: Create `TwistController` object
         self.controller = Controller(
