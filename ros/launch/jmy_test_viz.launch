@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<launch>
+
+    <!-- Use Styx Launch -->
+    <include file="launch/jmt_test.launch" />
+
+    <!-- visualization -->
+    <include file="$(find visualization)/launch/visualization.launch" />
+
+</launch>
