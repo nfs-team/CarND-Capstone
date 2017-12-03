@@ -202,7 +202,7 @@ include_directories(
 # catkin_add_nosetests(test)
 
 
-if(CATKIN_ENABLE_TESTING)
-  find_package(rostest REQUIRED)
-  add_rostest(test/visualization.test)
-endif()
+#if(CATKIN_ENABLE_TESTING)
+#  find_package(rostest REQUIRED)
+#  add_rostest(test/visualization.test)
+#endif()

@@ -15,14 +15,10 @@ class VisualizationHelper(object):
         self.loop()
 
 
-    def publish(self):
+    def loop(self):
         while not rospy.is_shutdown():
-
             self.rate.sleep()
 
 
 if __name__ == '__main__':
-    try:
-        VisualizationHelper()
-    except rospy.ROSInterruptException:
-        rospy.logerr('Could not start visualization helper node.')
+    VisualizationHelper()
