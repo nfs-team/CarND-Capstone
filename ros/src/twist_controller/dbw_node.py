@@ -8,6 +8,10 @@ import math
 
 from twist_controller import Controller
 
+from dynamic_reconfigure.server import Server
+from twist_controller.cfg import PIDParamsConfig
+
+
 '''
 You can build this node only after you have built (or partially built) the `waypoint_updater` node.
 
@@ -86,6 +90,8 @@ class DBWNode(object):
         self.proposed_angular_velocity = None
         self.previous_time = rospy.get_rostime()
 
+        self.srv = Server(PIDParamsConfig, self.config_callback)
+
         self.loop()
 
     def loop(self):
@@ -139,6 +145,10 @@ class DBWNode(object):
     def cb_currvel(self, msg):
         self.current_linear_velocity = msg.twist.linear.x
 
+    def config_callback(self, config, level):
+        rospy.loginfo("Updating Throttle PID %s, %s, %s", config["Throttle_P"], config["Throttle_I"], config["Throttle_D"])
+        self.controller.update(config["Throttle_P"], config["Throttle_I"], config["Throttle_D"])
+        return config
 
 if __name__ == '__main__':
     DBWNode()

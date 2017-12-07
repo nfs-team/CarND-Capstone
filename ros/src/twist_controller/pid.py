@@ -35,3 +35,8 @@ class PID(object):
         self.last_error = error
 
         return val
+
+    def update(self, kp, ki, kd):
+        self.kp = kp
+        self.ki = ki
+        self.kd = kd

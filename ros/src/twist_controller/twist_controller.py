@@ -48,5 +48,8 @@ class Controller(object):
 
         return throttle, brake, steer
 
+    def update(self, kp, ki, kd):
+        self.pid.update(kp,ki,kd)
+
     def reset(self):
         self.pid.reset();
