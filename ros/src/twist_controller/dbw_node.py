@@ -6,7 +6,7 @@ from dbw_mkz_msgs.msg import ThrottleCmd, SteeringCmd, BrakeCmd, SteeringReport
 from geometry_msgs.msg import TwistStamped
 import math
 
-from twist_controller import Controller
+from controller import Controller
 
 from dynamic_reconfigure.server import Server
 from twist_controller.cfg import PIDParamsConfig

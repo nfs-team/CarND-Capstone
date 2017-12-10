@@ -27,8 +27,11 @@ class VelocityUpdater(object):
         self.car_waypoint = None
         self.velocities = []
         self.traffic_light = None
+        self.weights_config = None
         pass
 
+    def update_weights(self, weight_config):
+        self.weights_config = weight_config
 
     def same_state(self, car_waypoint, traffic_light):
         if self.car_waypoint is None:
@@ -124,7 +127,7 @@ class VelocityUpdater(object):
                 #    if abs(velocity+end_v)/2 > 0.1:
                 #        max_t = distance_ / (abs(velocity+end_v)/4) #self.max_velocity
                     for i in range(T_STEPS):
-                        trajectory = Trajectory(start, [distance_, end_v, 0], (i + 1) * max_t / T_STEPS, self.max_velocity, distance)
+                        trajectory = Trajectory(start, [distance_, end_v, 0], (i + 1) * max_t / T_STEPS, self.max_velocity, distance, self.weights_config)
                         trajectories.append(trajectory)
             elif self.vel_equal(end_v, 0) and self.vel_equal(velocity, self.max_velocity):
                 for j in range(DISTANCE_STEPS):
@@ -134,14 +137,14 @@ class VelocityUpdater(object):
                #         max_t = distance_ / (abs(velocity + end_v) / 4)  # self.max_velocity
                     for i in range(T_STEPS):
                         start = [distance - distance_, velocity, 0]
-                        trajectory = Trajectory(start, [distance, end_v, 0], (i + 1) * max_t / T_STEPS, self.max_velocity, distance)
+                        trajectory = Trajectory(start, [distance, end_v, 0], (i + 1) * max_t / T_STEPS, self.max_velocity, distance, self.weights_config)
                         trajectories.append(trajectory)
             else:
                 max_t = distance / (self.max_velocity/8)
            #     if abs(velocity + end_v) / 2 > 0.1:
            #         max_t = distance / (abs(velocity + end_v) / 4)  # self.max_velocity
                 for i in range(T_STEPS):
-                    trajectory = Trajectory(start, [distance, end_v, 0], (i + 1) * max_t / T_STEPS, self.max_velocity, distance)
+                    trajectory = Trajectory(start, [distance, end_v, 0], (i + 1) * max_t / T_STEPS, self.max_velocity, distance, self.weights_config)
                     trajectories.append(trajectory)
 
             # if end_v == self.max_velocity or velocity == self.max_velocity && end:

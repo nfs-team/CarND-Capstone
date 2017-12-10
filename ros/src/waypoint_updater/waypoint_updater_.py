@@ -11,6 +11,10 @@ from velocity_updater import *
 
 import math
 
+from dynamic_reconfigure.server import Server
+from waypoint_updater.cfg import JMTParamsConfig
+
+
 '''
 This node will publish waypoints from the car's current position to some `x` distance ahead.
 
@@ -56,6 +60,9 @@ class WaypointUpdater(object):
         self.velocity_updater = VelocityUpdater(self.max_speed, rospy)
         self.traffic_light = None
         self.hasReceivedTrafficMsg = False
+
+        self.srv = Server(JMTParamsConfig, self.config_callback)
+
         self.loop()
         #rospy.spin()
 
@@ -65,6 +72,11 @@ class WaypointUpdater(object):
         while not rospy.is_shutdown():
             self.publish_waypoints()
             rate.sleep()
+
+    def config_callback(self, config, level):
+        rospy.loginfo("Updating JMT weights")
+        self.velocity_updater.update_weights(config)
+        return config
 
     def pose_cb(self, msg):
         # TODO: Implement
